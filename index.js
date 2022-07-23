@@ -23,7 +23,6 @@ if (steamCmdPath === null) {
       process.exit(1);
   }
 }
-
 let steamExe;
 platform === 'win32' ?  steamExe='steamcmd.exe' : steamExe='steamcmd.sh';
 
@@ -31,7 +30,7 @@ const steamCmdInstalled = existsSync(steamCmdPath + steamExe);
 console.log('SteamCMD is installed: ' + steamCmdInstalled);
 
 if(!steamCmdInstalled && shouldInstallSteamCMD) {
-  installSteamCmd(steamCmdPath, platform);
+  await installSteamCmd(steamCmdPath, platform);
 } else if(!steamCmdInstalled && !shouldInstallSteamCMD) {
   console.log('SteamCMD not found and config set to not install.');
   process.exit(1);
@@ -49,15 +48,14 @@ const server = createServer(async (req, res) => {
     try {
 
       let appId = req.url.split("/")[4];
+
       await lock.acquire();
-      
       console.log('Requesting app info for appId: ' + appId);
       let data = await getAppInfo(steamProcess, appId);
       console.log('typeof data: ' + typeof(data));
       res.writeHead(200, {'Content-Type': 'application/json'});
       res.end(data);
       lock.release();
-
 
     } catch(e) {
       locked = false;

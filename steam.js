@@ -1,9 +1,10 @@
 import stripAnsi from 'strip-ansi';
-import {mkdirSync, existsSync } from 'fs';
+import {mkdirSync, existsSync, createWriteStream } from 'fs';
 import {spawn} from 'child_process';
 import * as VDF from '@node-steam/vdf';
 import https from 'https';
 import pty from 'node-pty';
+import { resolve } from 'path';
 
 const platform = process.platform;
 /**
@@ -16,13 +17,13 @@ const platform = process.platform;
     * 
 */
 export function installSteamCmd(steamCmdPath) {
-
+    return new Promise((resolve, reject) => {
     try {
       mkdirSync(steamCmdPath);
-      console.log('Created directory: ' + steamCmdPath)
+      console.log('Created directory: ' + steamCmdPath);
     } catch(err) {
       console.error('Failed to make steamcmd directory: ' + steamCmdPath)
-      console.error(err)
+      console.error(err);
     }
 
     console.log('SteamCMD is not installed. Downloading...');
@@ -31,18 +32,25 @@ export function installSteamCmd(steamCmdPath) {
         case 'win32':
         //Download SteamCMD archive for windows.
         https.get('https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip', (res) => {
-            res.pipe(require('fs').createWriteStream(steamCmdPath + 'steamcmd.zip'));
+            res.pipe(createWriteStream(steamCmdPath + 'steamcmd.zip'));
             res.on('end', () => {
                 console.log('Downloaded SteamCMD for windows')
                 //Extract downloaded archive
                 spawn('PowerShell', ['-Command', 'Expand-Archive -Path "' + steamCmdPath + 'steamcmd.zip" -Destination "' + steamCmdPath + '"'])
                 .on('exit', () => {
                     if(!existsSync(steamCmdPath + 'steamcmd.exe')){
-                        console.error('Failed to extract SteamCMD')
-                        process.exit(1)
+                        console.error('Failed to extract SteamCMD');
+                        process.exit(1);
                     } 
                     console.log('SteamCMD extracted successfully')
-                    runSteamCmd(steamCmdPath, ['login anonymous', 'quit']);
+                    //Todo refactor runSteamCmd
+                    runSteamCmd(steamCmdPath, ['login anonymous', 'quit']).then(()=>{
+                        resolve();
+                    }).catch(err => {
+                        console.error(err);
+                        reject(err);
+                    });
+                    
                 })
             })
         })
@@ -50,16 +58,24 @@ export function installSteamCmd(steamCmdPath) {
         case 'linux': 
         //Download SteamCMD archive for linux.
         https.get('https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz', (res, err) => {
-            res.pipe(require('fs').createWriteStream(steamCmdPath + 'steamcmd_linux.tar.gz'));
+            res.pipe(createWriteStream(steamCmdPath + 'steamcmd_linux.tar.gz'));
             res.on('end', () => {
                 console.log('Downloaded SteamCMD for linux')
                 spawn('tar', ['-xzvf', steamCmdPath + 'steamcmd.tar.gz', '-C', steamCmdPath])
                 .on('exit', () => {
                     if(!existsSync(steamCmdPath + 'steamcmd.sh')){
-                        console.error('Failed to extract SteamCMD')
-                        process.exit(1)
+                        console.error('Failed to extract SteamCMD');
+                        process.exit(1);
                     }
                     console.log('SteamCMD extracted successfully')
+                    //Todo refactor/fix runSteamCmd
+                    runSteamCmd(steamCmdPath, ['login anonymous', 'quit']).then(() =>{
+                        resolve();
+                    }).catch(err => {
+                        console.error(err);
+                        reject(err);
+                    })
+
                 })
             })
         })
@@ -68,11 +84,24 @@ export function installSteamCmd(steamCmdPath) {
         case 'darwin':
         //Download SteamCMD archive for mac.
         https.get('https://steamcdn-a.akamaihd.net/client/installer/steamcmd_osx.tar.gz', (res, err) => {
-            res.pipe(require('fs').createWriteStream(steamCmdPath + 'steamcmd_osx.tar.gz'));
+            res.pipe(createWriteStream(steamCmdPath + 'steamcmd_osx.tar.gz'));
             res.on('end', () => {
                 console.log('Downloaded SteamCMD for darwin')
                 spawn('tar', ['-xzvf', steamCmdPath + 'steamcmd.tar.gz', '-C', steamCmdPath])
-                //Todo, check if extracted successfully
+                .on('exit', () => {
+                    if(!existsSync(steamCmdPath + 'steamcmd.sh')){
+                        console.error('Failed to extract SteamCMD')
+                        process.exit(1)
+                    }
+                    console.log('SteamCMD extracted successfully')
+                    //Todo refactor runSteamCmd
+                    runSteamCmd(steamCmdPath, ['login anonymous', 'quit']).then(() =>{
+                        resolve();
+                    }).catch(err => {
+                        console.error(err);
+                        reject(err);
+                    })
+                })
             })
         })
         break;
@@ -80,6 +109,7 @@ export function installSteamCmd(steamCmdPath) {
         console.log('Unsupported platform')
         break;
     }
+    })
 }
 
 /**
@@ -92,22 +122,30 @@ export function installSteamCmd(steamCmdPath) {
  * runSteamCmd('/steamcmd/', ['login anonymous', 'app_info_update 1', 'app_info_print 740', 'quit']); //Get app info for steam_appid 740 linux/macos
 **/
 export function runSteamCmd(steamCmdPath, args) {
+    return new Promise((resolve, reject) => {
     let steamcmdExe;
     switch (platform) {
         case 'win32': steamcmdExe = steamCmdPath + 'steamcmd.exe'; break;
         case 'linux' || 'darwin': steamcmdExe = steamCmdPath + 'steamcmd.sh'; break;
     }
-    console.log(steamcmdExe, ['+', args]);
-
-    const steamCmdShell = spawn(steamcmdExe, ['+' + args]);
+    console.log(steamcmdExe, [' +' + args]);
+    let stringArgs;
+    args.forEach(element => {
+        stringArgs += ' +' + element;
+    });
+    const steamCmdShell = spawn(steamcmdExe + stringArgs);
     steamCmdShell.stdout.on('data', (data) => { console.log(data.toString()) });
     steamCmdShell.stderr.on('data', (data) => { console.error(data.toString()) });
-    steamCmdShell.on('exit', (code) => { console.log('SteamCMD exited with code: ' + code) });
+    steamCmdShell.on('exit', (code) => { 
+        console.log('SteamCMD exited with code: ' + code);
+        resolve(code) 
+    });
+    });
 }
 /**
  * 
- * @param {string} steamCmdPath path to steamcmd folder
- * @returns 
+ * @param {string} steamCmdPath
+ * 
  */
 export function createSteamProcess(steamCmdPath) {
     return new Promise((resolve, reject) => {
