@@ -13,7 +13,7 @@ Only logs into steam anonymously so some info may not be shown. Only tested on w
 
 SteamCMD command: 
 
-**app_info_print** 
+`app_info_print`
 
 ```
 app_info_print <appid>
@@ -64,6 +64,8 @@ Install dependencies.
 ```
 npm i
 ```
+
+If you have errors during npm i you may need build tools which can be installed during the node installer or using `npm install --global windows-build-tools` 
 
 ## Run.
 
