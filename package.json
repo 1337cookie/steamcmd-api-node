@@ -1,0 +1,35 @@
+{
+  "name": "steamcmd-api-node",
+  "version": "0.0.1",
+  "description": "A SteamCmd Api for nodejs.",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1337cookie/steamcmd-api-node.git"
+  },
+  "keywords": [
+    "Steam",
+    "SteamCMD",
+    "API"
+  ],
+  "author": "1337cookie",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/1337cookie/steamcmd-api-node/issues"
+  },
+  "homepage": "https://github.com/1337cookie/steamcmd-api-node#readme",
+  "devDependencies": {
+    "@types/node": "^18.0.6"
+  },
+  "dependencies": {
+    "@node-steam/vdf": "^2.2.0",
+    "dotenv": "^16.0.1",
+    "node-pty": "^0.10.1",
+    "strip-ansi": "^7.0.1"
+  }
+}
