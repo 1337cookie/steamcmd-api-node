@@ -1,13 +1,13 @@
 # SteamCMD-API-node
 
 A web API made for retrieving info from SteamCMD cli utility.  Built with node.  
-Currently only tested on Windows.
+
 
 Why? 
 
 Some information is only available through SteamCMD but is very useful for checking for updates for dedicated servers. Other information like launch options and icon locations are also only available through SteamCMD.  
   
-Currently only logs into steam anonymously. Open to criticism and suggestions. 
+Only logs into steam anonymously so some info may not be shown. Only tested on windows so far. This is a first pass WIP. Open to criticism, suggestions, requests, PRs, lessons.  
 
 ## Usage:
 
@@ -96,3 +96,4 @@ Todo:
 * [ ] Clear cache every time.
 * [ ] Manage failure and restarts.
 * [ ] Find out if some information is only available to app subscribers.
+* [ ] Test on mac and linux.
