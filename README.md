@@ -52,6 +52,8 @@ Returns:
 
 ## Install.
 
+You will need [nodejs](https://nodejs.org/) installed.
+
 Clone repo:
 
 ```
