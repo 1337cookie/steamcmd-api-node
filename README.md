@@ -57,7 +57,7 @@ You will need [nodejs](https://nodejs.org/) installed.
 Clone repo:
 
 ```
-git clone https://githuv.com/1337cookie/steamcmd-api-node.git
+git clone https://github.com/1337cookie/steamcmd-api-node.git
 ```
 
 Change directory:
