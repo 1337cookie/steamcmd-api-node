@@ -6,7 +6,7 @@ A web API made for retrieving info from SteamCMD cli utility. Built with node.
 
 Some information is only available through SteamCMD but is very useful for checking for updates for dedicated game servers. Other information like launch options and icon locations are also only available through SteamCMD.
 
-There's a couple of gotchas when you want to interact programatically with SteamCMD. It has some strange behaivour when EOL is sent from its output so you must poll the STDIN with data till you can see the output. Often the first time you query SteamCMD it will return no dataso we retry untill the data has the right shape. We use 
+There's a couple of gotchas when you want to interact programatically with SteamCMD. It has some strange behaivour when EOL is sent from its output so you must poll the STDIN with data till you can see the output. Often the first time you query SteamCMD it will return no dataso we retry untill the data has the right shape.  
 It only logs into steam anonymously so some info may not be shown. So far only tested on windows. This is a first pass WIP. Open to criticism, suggestions, requests, PRs, lessons.
 
 You can access my instance of the API at https://steamcmd.buddy.nz/ . I wont guarantee it will be available.
